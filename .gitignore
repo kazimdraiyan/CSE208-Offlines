@@ -1,0 +1,10 @@
+.vscode
+.idea
+
+*.exe
+*.class
+
+github_link.txt
+
+experiments/
+submission/
