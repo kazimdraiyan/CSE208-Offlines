@@ -1,0 +1,27 @@
+Input:
+5
+F1 A B 06:00 08:00
+F2 B C 11:30 13:30
+F3 A B 07:00 09:00
+F4 B D 12:30 14:30
+F5 D E 18:00 20:00
+
+Output:
+Number of Aircraft: 2
+Aircraft 1: F1 -> F2
+Aircraft 2: F3 -> F4 -> F5
+
+
+Input:
+6
+F1 X Y 05:00 07:00
+F2 Y Z 10:30 12:30
+F3 Z X 16:00 18:00
+F4 X Y 08:00 10:00
+F5 Y Z 14:00 16:00
+F6 Z W 19:30 21:30
+
+Output:
+Number of Aircraft: 2
+Aircraft 1: F1 -> F2 -> F3
+Aircraft 2: F4 -> F5 -> F6
