@@ -1,0 +1,37 @@
+AVL
+operation,count,total_ns,average_ns
+insert,47,20600,438
+delete,23,11500,500
+find,7,1600,228
+traverse,3,13500,4500
+
+Interval Scheduler Basic
+operation,count,total_ns,average_ns
+add,14,30200,2157
+remove,15,14200,946
+update,6,8600,1433
+conflict,8,1900,237
+overlaps,11,17800,1618
+at,10,8400,840
+next,11,2000,181
+
+Interval Scheduler Edge
+operation,count,total_ns,average_ns
+add,19,42300,2226
+remove,18,19500,1083
+update,5,9400,1880
+conflict,13,4400,338
+overlaps,10,17100,1710
+at,16,20900,1306
+next,13,2500,192
+
+Interval Scheduler Large
+Interval Scheduler
+operation,count,total_ns,average_ns
+add,950,1302800,1371
+remove,120,186900,1557
+update,130,324100,2493
+conflict,150,80800,538
+overlaps,150,263400,1756
+at,150,169000,1126
+next,150,62500,416
