@@ -1,0 +1,6 @@
+Total words: 10000
+Total searched: 1000
+Technique       Hash1 Collisions    Hash1 Avg Hits  Hash2 Collisions    Hash2 Avg Hits  
+Chaining        3047                1.162           2978                1.137           
+Double Hashing  3660                1.181           3590                1.203           
+Custom Probing  3615                1.186           3574                1.191
