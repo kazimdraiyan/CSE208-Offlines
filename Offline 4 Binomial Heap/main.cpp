@@ -201,44 +201,48 @@ private:
 
     // * Part B helper methods
     // Example tree block format for B3:
-    // 5 --- 55
-    //   --- 15 --- 50
-    //   --- 10 --- 40
-    //          --- 20 --- 70
-    vector<string> treeBlock(Node *node) const
+    // 5
+    // ├── 55
+    // ├── 15
+    // │   └── 50
+    // └── 10
+    //     ├── 40
+    //     └── 20
+    //         └── 70
+    vector<string> treeBlock(Node *node, const string &prefix = "", bool isLast = true, bool isRoot = true) const
     {
-        string keyStr = to_string(node->key);
+        vector<string> result;
 
-        if (!node->child)
-            return {keyStr};
+        // Root has no connector before it
+        if (isRoot)
+            result.push_back(to_string(node->key));
+        else
+            result.push_back(prefix + (isLast ? "└── " : "├── ") + to_string(node->key));
 
         // Collect children left to right
         vector<Node *> children;
         for (Node *c = node->child; c; c = c->next)
             children.push_back(c);
-        reverse(children.begin(), children.end()); // Sort children in ascending degree
 
-        vector<string> result;
+        // Children are stored in descending degree
+        reverse(children.begin(), children.end());
 
-        // First child on the same line as node
-        vector<string> firstChildBlock = treeBlock(children[0]);
-        result.push_back(keyStr + " --- " + firstChildBlock[0]);
+        if (children.empty())
+            return result;
 
-        // Indent remaining children of the first child
-        string firstChildIndent(keyStr.size() + 5, ' '); // "Key --- "
-        for (int i = 1; i < firstChildBlock.size(); i++)
-            result.push_back(firstChildIndent + firstChildBlock[i]);
+        // Prefix used by descendants
+        string childPrefix;
 
-        // Indent siblings of the first child
-        string siblingIndent(keyStr.size() + 1, ' ');
-        for (int i = 1; i < children.size(); i++)
+        if (isRoot)
+            childPrefix = "";
+        else
+            childPrefix = prefix + (isLast ? "    " : "│   ");
+
+        for (size_t i = 0; i < children.size(); i++)
         {
-            vector<string> childBlock = treeBlock(children[i]);
-            result.push_back(siblingIndent + "--- " + childBlock[0]);
-
-            string nestedIndent = siblingIndent + string(4, ' '); // "--- "
-            for (int j = 1; j < childBlock.size(); j++)
-                result.push_back(nestedIndent + childBlock[j]);
+            bool childIsLast = (i == children.size() - 1);
+            vector<string> childBlock = treeBlock(children[i], childPrefix, childIsLast, false);
+            result.insert(result.end(), childBlock.begin(), childBlock.end());
         }
 
         return result;
@@ -246,12 +250,12 @@ private:
 
     void drawTree(Node *root, stringstream &sout) const
     {
-        vector<string> treeBlockLines = treeBlock(root);
-        for (int i = 0; i < treeBlockLines.size(); i++)
+        vector<string> lines = treeBlock(root);
+        for (size_t i = 0; i < lines.size(); i++)
         {
-            sout << treeBlockLines[i];
-            if (i < treeBlockLines.size() - 1)
-                sout << endl;
+            sout << lines[i];
+            if (i + 1 < lines.size())
+                sout << '\n';
         }
     }
 
