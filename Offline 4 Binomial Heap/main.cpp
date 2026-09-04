@@ -92,7 +92,7 @@ private:
         x->degree++;
     }
 
-    void consolidate()
+    void consolidate(stringstream *sout = nullptr)
     {
         Node *previous = nullptr;
         Node *current = head;
@@ -105,14 +105,19 @@ private:
 
             if (!threeConsecutiveSameDegree && current->degree == next->degree)
             {
+                int degreeBeforeLinking = current->degree;
                 if (current->key <= next->key)
                 {
                     linkTrees(current, next);
+                    if (sout)
+                        printLinkStep(next, current, degreeBeforeLinking, *sout);
                     current->next = secondNext; // Delete next from root list
                 }
                 else
                 {
                     linkTrees(next, current);
+                    if (sout)
+                        printLinkStep(next, current, degreeBeforeLinking, *sout);
                     if (previous)
                         previous->next = next; // Delete current from root list
                     else
@@ -127,26 +132,6 @@ private:
             }
         }
     }
-
-    // Node *findMinNode() const
-    // {
-    //     if (!head)
-    //         return nullptr;
-
-    //     Node *current = head;
-    //     Node *minNode = current;
-    //     int minKey = current->key;
-    //     while (current->next)
-    //     {
-    //         if (current->next->key < minKey)
-    //         {
-    //             minKey = current->next->key;
-    //             minNode = current->next;
-    //         }
-    //         current = current->next;
-    //     }
-    //     return minNode;
-    // }
 
     // Nodes are not swapped. Only keys are swapped.
     void bubbleUp(Node *node)
@@ -259,6 +244,14 @@ private:
         }
     }
 
+    // Called by consolidate() right after each linking equal degree trees for union visualization
+    void printLinkStep(Node *parent, Node *child, int degree, stringstream &sout)
+    {
+        sout << "B" << degree << " (root " << child->key
+             << ") linked under B" << degree << " (root " << parent->key
+             << ") -> B" << (degree + 1) << " (root " << parent->key << ")" << endl;
+    }
+
 public:
     BinomialHeap() : head(nullptr) {}
 
@@ -348,7 +341,7 @@ public:
     }
 
     // Assume keys are unique accross both heaps
-    void unionWith(BinomialHeap &other)
+    void unionWith(BinomialHeap &other, stringstream *sout = nullptr)
     {
         // Merge other.locate into this
         for (const pair<int, Node *> &entry : other.locate)
@@ -357,7 +350,7 @@ public:
         }
 
         head = mergeRootLists(head, other.head); // Corrupts other's root list
-        consolidate();
+        consolidate(sout);
 
         // Clear other heap
         other.head = nullptr;
@@ -480,6 +473,26 @@ public:
         }
     }
 
+    // Feature 2:
+    void visualizeUnion(BinomialHeap &other, int idA, int idB, stringstream &sout)
+    {
+        sout << endl
+             << "H" << idA << " before union:" << endl;
+        visualizeHeap(idA, sout);
+
+        sout << endl
+             << "H" << idB << " before union:" << endl;
+        other.visualizeHeap(idB, sout);
+
+        sout << endl
+             << "Linking steps:" << endl;
+        unionWith(other, &sout);
+
+        sout << "H" << idA << " after union:" << endl;
+        visualizeHeap(idA, sout);
+        sout << endl;
+    }
+
     // Feature 3:
     void visualizeBinaryRepresentation(int heapId, stringstream &sout) const
     {
@@ -493,7 +506,6 @@ public:
             sout << "0";
         else
         {
-            // 32 bits is plenty since n <= 10^5 per the handout's constraints.
             string bits = bitset<32>(n).to_string();
             size_t firstOne = bits.find('1');
             sout << bits.substr(firstOne);
@@ -555,7 +567,7 @@ public:
             outFile.close();
     }
 
-    // Commands: I h x, F h, E h, D h x y, R h x, U h1 h2, P h
+    // Commands: I h x, F h, E h, D h x y, R h x, U h1 h2, P h, VH h, VB h, VU h1 h2
     // Only F, E, P produce output
     void run(const string &inPath)
     {
@@ -641,6 +653,14 @@ public:
                 heapById(h).visualizeBinaryRepresentation(h, sout);
                 output(sout.str());
             }
+            else if (cmd == "VU")
+            {
+                int h1id, h2id;
+                ss >> h1id >> h2id;
+                stringstream sout;
+                heapById(h1id).visualizeUnion(heapById(h2id), h1id, h2id, sout);
+                output(sout.str());
+            }
             else
             {
                 output("Invalid input.");
@@ -653,8 +673,9 @@ public:
 
 int main()
 {
-    // Generate output for the 10 testcases
-    for (int test = 3; test <= 3; test++)
+    // Generate output for the 11 testcases
+    // The 11th test case is for showcasing visualization features
+    for (int test = 1; test <= 11; test++)
     {
         string test_id = "";
         if (test < 10)
