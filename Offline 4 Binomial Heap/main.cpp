@@ -574,7 +574,7 @@ public:
         ifstream inFile(inPath);
         if (!inFile.is_open())
         {
-            cout << "Input file not found" << endl;
+            cout << "Input file " << inPath << " not found" << endl;
             return;
         }
 
@@ -687,6 +687,10 @@ int main()
         IOManager manager(outputFilePath);
         manager.run(inputFilePath);
     }
+
+    // Generate output for single input file
+    // IOManager manager("output.txt");
+    // manager.run("input.txt");
 
     return 0;
 }
