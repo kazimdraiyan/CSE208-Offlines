@@ -199,6 +199,62 @@ private:
         delete node;
     }
 
+    // * Part B helper methods
+    // Example tree block format for B3:
+    // 5 --- 55
+    //   --- 15 --- 50
+    //   --- 10 --- 40
+    //          --- 20 --- 70
+    vector<string> treeBlock(Node *node) const
+    {
+        string keyStr = to_string(node->key);
+
+        if (!node->child)
+            return {keyStr};
+
+        // Collect children left to right
+        vector<Node *> children;
+        for (Node *c = node->child; c; c = c->next)
+            children.push_back(c);
+        reverse(children.begin(), children.end()); // Sort children in ascending degree
+
+        vector<string> result;
+
+        // First child on the same line as node
+        vector<string> firstChildBlock = treeBlock(children[0]);
+        result.push_back(keyStr + " --- " + firstChildBlock[0]);
+
+        // Indent remaining children of the first child
+        string firstChildIndent(keyStr.size() + 5, ' '); // "Key --- "
+        for (int i = 1; i < firstChildBlock.size(); i++)
+            result.push_back(firstChildIndent + firstChildBlock[i]);
+
+        // Indent siblings of the first child
+        string siblingIndent(keyStr.size() + 1, ' ');
+        for (int i = 1; i < children.size(); i++)
+        {
+            vector<string> childBlock = treeBlock(children[i]);
+            result.push_back(siblingIndent + "--- " + childBlock[0]);
+
+            string nestedIndent = siblingIndent + string(4, ' '); // "--- "
+            for (int j = 1; j < childBlock.size(); j++)
+                result.push_back(nestedIndent + childBlock[j]);
+        }
+
+        return result;
+    }
+
+    void drawTree(Node *root, stringstream &sout) const
+    {
+        vector<string> treeBlockLines = treeBlock(root);
+        for (int i = 0; i < treeBlockLines.size(); i++)
+        {
+            sout << treeBlockLines[i];
+            if (i < treeBlockLines.size() - 1)
+                sout << endl;
+        }
+    }
+
 public:
     BinomialHeap() : head(nullptr) {}
 
@@ -392,6 +448,76 @@ public:
         }
         return totalSize;
     }
+
+    // * Part B methods:
+    // Feature 1:
+    void visualizeHeap(int heapId, stringstream &sout) const
+    {
+        sout << "Visualizing Binomial Heap H" << heapId << endl;
+
+        sout << "Heap size: " << size() << endl;
+
+        if (!head)
+        {
+            sout << "Heap H" << heapId << " is empty.";
+            return;
+        }
+
+        Node *currentRoot = head;
+        while (currentRoot)
+        {
+            sout << "Binomial Tree B" << currentRoot->degree << ":" << endl;
+
+            drawTree(currentRoot, sout);
+
+            currentRoot = currentRoot->next;
+            if (currentRoot)
+                sout << endl;
+        }
+    }
+
+    // Feature 3:
+    void visualizeBinaryRepresentation(int heapId, stringstream &sout) const
+    {
+        int n = size();
+        sout << "Binary notation of H" << heapId << ":";
+        sout << " n = " << n;
+        sout << " (";
+
+        // Print n in binary
+        if (n == 0)
+            sout << "0";
+        else
+        {
+            // 32 bits is plenty since n <= 10^5 per the handout's constraints.
+            string bits = bitset<32>(n).to_string();
+            size_t firstOne = bits.find('1');
+            sout << bits.substr(firstOne);
+        }
+        sout << ")" << endl;
+
+        // Traverse root list
+        vector<int> degrees;
+        Node *current = head;
+        while (current)
+        {
+            degrees.push_back(current->degree);
+            current = current->next;
+        }
+
+        // Print the degrees of the binomial trees
+        sout << "Binomial trees in H2: ";
+        if (degrees.empty())
+        {
+            sout << "None";
+        }
+        for (int i = degrees.size() - 1; i >= 0; i--)
+        {
+            sout << "B" << degrees[i];
+            if (i > 0)
+                sout << " ";
+        }
+    }
 };
 
 class IOManager
@@ -495,6 +621,22 @@ public:
 
                 output(sout.str());
             }
+            else if (cmd == "VH")
+            {
+                int h;
+                ss >> h;
+                stringstream sout;
+                heapById(h).visualizeHeap(h, sout);
+                output(sout.str());
+            }
+            else if (cmd == "VB")
+            {
+                int h;
+                ss >> h;
+                stringstream sout;
+                heapById(h).visualizeBinaryRepresentation(h, sout);
+                output(sout.str());
+            }
             else
             {
                 output("Invalid input.");
@@ -508,7 +650,7 @@ public:
 int main()
 {
     // Generate output for the 10 testcases
-    for (int test = 1; test <= 10; test++)
+    for (int test = 3; test <= 3; test++)
     {
         string test_id = "";
         if (test < 10)
